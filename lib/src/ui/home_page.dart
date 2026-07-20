@@ -1,10 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../bloc/tracking_bloc.dart';
 import '../models/location_record.dart';
-import 'map_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -128,11 +130,7 @@ class _LocationTile extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => MapPage(location: location)),
-          );
-        },
+        onTap: () => openMap(location.latitude, location.longitude),
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(
@@ -179,6 +177,20 @@ class _LocationTile extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> openMap(double lat, double lng) async {
+    Uri uri;
+
+    if (Platform.isIOS) {
+      uri = Uri.parse('http://maps.apple.com/?q=$lat,$lng');
+    } else {
+      uri = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+      );
+    }
+
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }
 
